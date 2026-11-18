@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Distribusi dan Konsumsi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .container {
+    background-color: #ffffff;
+    color: #1e293b;
+    width: 100%;
+    max-width: 820px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    padding: 36px;
+    transition: all 0.3s ease;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+    color: #0f172a;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-bottom: 28px;
+  }
+
+  .form-group {
+    margin-bottom: 22px;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #334155;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  .duration-options {
+    display: flex;
+    gap: 16px;
+  }
+
+  .duration-btn {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    background-color: #f8fafc;
+    color: #334155;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .duration-btn.active {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  .error-msg {
+    color: #dc2626;
+    font-size: 0.88rem;
+    margin-top: 6px;
+    display: none;
+  }
+
+  /* Quiz Header */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .player-badge {
+    background-color: #f1f5f9;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #334155;
+  }
+
+  .progress-badge {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.95rem;
+  }
+
+  .timer-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #fef3c7;
+    color: #b45309;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border: 2px solid #fde68a;
+  }
+
+  .timer-box.danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border-color: #fecaca;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+
+  /* Question & Options */
+  .question-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.65;
+    margin-bottom: 24px;
+    white-space: pre-line;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Kontras warna latar tombol jawaban dan font jawaban */
+  .option-btn {
+    width: 100%;
+    text-align: left;
+    padding: 16px 20px;
+    background-color: #1e293b; /* Latar gelap */
+    color: #fef08a; /* Font kuning terang kontras */
+    font-family: 'Merriweather', serif; /* Font berbeda dari judul/UI */
+    font-size: 0.98rem;
+    line-height: 1.5;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    background-color: #334155;
+    border-color: #60a5fa;
+    transform: translateY(-1px);
+  }
+
+  .option-btn:disabled {
+    cursor: default;
+  }
+
+  .option-letter {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    background-color: #334155;
+    color: #ffffff;
+    min-width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* State Benar (Hijau) */
+  .option-btn.correct {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+    border-color: #15803d !important;
+  }
+
+  .option-btn.correct .option-letter {
+    background-color: #14532d;
+    color: #ffffff;
+  }
+
+  /* State Salah (Merah) */
+  .option-btn.wrong {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    border-color: #b91c1c !important;
+  }
+
+  .option-btn.wrong .option-letter {
+    background-color: #7f1d1d;
+    color: #ffffff;
+  }
+
+  .feedback-bar {
+    margin-top: 20px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .feedback-correct {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+  }
+
+  .feedback-wrong {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  .feedback-timeout {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+  }
+
+  .btn-next {
+    padding: 10px 22px;
+    background-color: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+
+  .btn-next:hover {
+    background-color: #334155;
+  }
+
+  /* Result & Review Screen */
+  .result-card {
+    text-align: center;
+    background-color: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+
+  .quiz-review-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    margin-bottom: 6px;
+  }
+
+  .score-circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 18px auto;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+  }
+
+  .score-number {
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .score-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .stat-correct { color: #16a34a; }
+  .stat-wrong { color: #dc2626; }
+
+  .review-heading {
+    font-size: 1.25rem;
+    color: #0f172a;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 460px;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-bottom: 24px;
+  }
+
+  .review-item {
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 18px;
+    background-color: #ffffff;
+  }
+
+  .review-item.item-correct {
+    border-left: 6px solid #16a34a;
+  }
+
+  .review-item.item-wrong {
+    border-left: 6px solid #dc2626;
+  }
+
+  .review-q {
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 12px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  .review-ans {
+    font-family: 'Merriweather', serif;
+    font-size: 0.92rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .ans-user-wrong {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .ans-user-timeout {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .ans-right {
+    background-color: #dcfce7;
+    color: #166534;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- SCREEN 1: START -->
+  <div id="start-screen">
+    <h1 id="main-quiz-title">Kuis Ekonomi: Distribusi dan Konsumsi</h1>
+    <p class="subtitle">Total 22 Soal Pilihan Ganda • Soal & Jawaban Diacak Otomatis</p>
+
+    <div class="form-group">
+      <label for="player-name">Nama Pemain Kuis</label>
+      <input type="text" id="player-name" placeholder="Masukkan nama lengkap Anda..." autocomplete="off">
+      <div id="name-error" class="error-msg">Silakan masukkan nama pemain terlebih dahulu!</div>
+    </div>
+
+    <div class="form-group">
+      <label>Pilih Durasi Waktu per Soal</label>
+      <div class="duration-options" id="duration-options">
+        <button type="button" class="duration-btn active" data-time="15">15 Detik</button>
+        <button type="button" class="duration-btn" data-time="30">30 Detik</button>
+      </div>
+    </div>
+
+    <button type="button" class="btn-primary" onclick="startQuiz()">Mulai Kuis Sekarang</button>
+  </div>
+
+  <!-- SCREEN 2: QUIZ -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-header">
+      <div class="player-badge">Pemain: <span id="display-name"></span></div>
+      <div class="progress-badge">Soal <span id="q-current">1</span> dari <span id="q-total">22</span></div>
+      <div class="timer-box" id="timer-box">⏱️ <span id="time-left">15</span> dtk</div>
+    </div>
+
+    <div class="question-text" id="question-text"></div>
+    <div class="options-list" id="options-list"></div>
+
+    <div id="feedback-bar" class="feedback-bar hidden">
+      <span id="feedback-text"></span>
+      <button type="button" class="btn-next" id="next-btn" onclick="nextQuestion()">Soal Berikutnya ➔</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: RESULT & REVIEW -->
+  <div id="result-screen" class="hidden">
+    <div class="result-card">
+      <div class="quiz-review-title">Kuis Ekonomi: Distribusi dan Konsumsi</div>
+      <p style="color:#475569; font-weight:500;">Hasil Akhir Pemain: <strong id="result-player-name" style="color:#0f172a;"></strong></p>
+
+      <div class="score-circle">
+        <div class="score-number" id="final-score">0</div>
+        <div class="score-label">Skor Akhir</div>
+      </div>
+
+      <div class="stats-row">
+        <span class="stat-correct">✔ Benar: <span id="total-correct">0</span></span>
+        <span class="stat-wrong">✖ Salah / Habis Waktu: <span id="total-wrong">0</span></span>
+      </div>
+    </div>
+
+    <h2 class="review-heading">Review Jawaban Lengkap (22 Soal)</h2>
+    <div class="review-list" id="review-list"></div>
+
+    <button type="button" class="btn-primary" onclick="resetToStart()">Main Lagi (Acak Ulang Soal & Jawaban)</button>
+  </div>
+</div>
+
+<script>
+  const rawQuestions = [
+    {
+      q: "Berkurangnya pasokan minyak dari Pertamina ke kabupaten Deli Serdang membuat tingkat konsumsi minyak di kabupaten Deli Serdang menurun. Pernyataan tersebut menunjukkan konsumsi dipengaruhi oleh...",
+      options: [
+        "Harga barang",
+        "Struktur pajak",
+        "Penghasilan masyarakat",
+        "Ketersediaan barang"
+      ],
+      answer: "Ketersediaan barang"
+    },
+    {
+      q: "Berlakunya Masyarakat Ekonomi Asean (MEA) mulai Januari 2016 memberi keuntungan yang besar bagi pabrik sepatu milik Pak Purba, karena ia dapat memasarkan sepatu buatan pabriknya ke berbagai negara di Asia Tenggara. Pak Purba termasuk lembaga distribusi....",
+      options: [
+        "Importir",
+        "Eksportir",
+        "Agen",
+        "Makelar"
+      ],
+      answer: "Eksportir"
+    },
+    {
+      q: "Karena lagi butuh uang, Ibu Sianturi hendak menjual tanahnya dengan meminta bantuan Pak Simbolon. Pak Simbolon kemudian menjual rumah tersebut kepada Pak Gurning. Apabila Pak Simbolon merupakan seorang makelar, maka tanah tersebut dijual atas nama...",
+      options: [
+        "Ibu Sianturi dan Pak Simbolon",
+        "Pak Gurning",
+        "Pak Simbolon",
+        "Ibu Sianturi"
+      ],
+      answer: "Ibu Sianturi"
+    },
+    {
+      q: "Saat ini, distributor gencar melakukan iklan untuk memperkenalkan produknya. Iklan merupakan hal yang paling penting bagi proses distribusi suatu produk atau barang, karena....",
+      options: [
+        "Dapat memengaruhi harga",
+        "Akan mampu mengikat produsen",
+        "Akan mampu menentukan jenis barang apa yang akan di produksi",
+        "Dapat memengaruhi minat, selera, dan kebutuhan konsumen"
+      ],
+      answer: "Dapat memengaruhi minat, selera, dan kebutuhan konsumen"
+    },
+    {
+      q: "Berikut ini pernyataan yang benar mengenai faktor nonekonomi yang memengaruhi konsumsi adalah...",
+      options: [
+        "Semakin banyak jumlah anggota keluarga, maka semakin sedikit jumlah dan jenis konsumsi keluarga yang bersangkutan",
+        "Orang Bali yang beragama Hindu boleh makan daging sapi, tetapi tidak boleh makan daging babi",
+        "Semakin tinggi tingkat pendidikan seseorang, semakin beragam kebutuhan yang dimiliki",
+        "Kebutuhan orang yang tinggal di pedesaan umumnya lebih banyak dibandingkan dengan orang yang tinggal di perkotaaan."
+      ],
+      answer: "Semakin tinggi tingkat pendidikan seseorang, semakin beragam kebutuhan yang dimiliki"
+    },
+    {
+      q: "Perbedaan pedagang besar dengan pedagang eceran yang tepat adalah...",
+      options: [
+        "Pedagang besar membeli dan menjual barang dalam jumlah kecil, sedangkan pedagang eceran menjual dan membeli barang dalam jumlah besar",
+        "Pedagang besar menyalurkan produknya dengan sistem distribusi semi langsung, sedangkan pedangan eceran dengan sistem distribusi tidak langsung",
+        "Pada umumnya pedagang besar menjual barangnya kepada konsumen melalui pedagang eceran, sedangkan pedagang eceran menjual barangnya langsung kepada konsumen",
+        "Grosir merupakan pedagang eceran, sedangkan kios merupakan pedagang besar."
+      ],
+      answer: "Pada umumnya pedagang besar menjual barangnya kepada konsumen melalui pedagang eceran, sedangkan pedagang eceran menjual barangnya langsung kepada konsumen"
+    },
+    {
+      q: "Dengan penghasilan Rp.1.000.000,00 sebulan, kebutuhan yang dapat dipenuhi keluarga pak Harun sangat terbatas. Sedangkan kebutuhan yang dapat dipenuhi keluarga pak Stevien lebih banyak dan beraneka ragam karena penghasilannya Rp.20.000.000,00 sebulan. Hal tersebut menunjukkan konsumsi dipengaruhi faktor...",
+      options: [
+        "Tingkat pendidikan",
+        "Jumlah tanggungan keluarga",
+        "Tingkat pendapatan",
+        "Tingkat harga barang dan jasa"
+      ],
+      answer: "Tingkat pendapatan"
+    },
+    {
+      q: "Tingkat harga barang dan jasa dapat memengaruhi konsumsi, dimana ....",
+      options: [
+        "Semakin naik harga barang, semakin menurun jumlah barang tersebut yang dikonsumsi",
+        "Semakin tinggi harga barang, semakin banyak jumlah barang tersebut yang dikonsumsi",
+        "Semakin tinggi jumlah barang yang dikonsumsi, maka semakin murah harga barang tersebut",
+        "Semakin rendah harga barang, semakin sedikit jumlah barang tersebut yang dikonsumsi"
+      ],
+      answer: "Semakin naik harga barang, semakin menurun jumlah barang tersebut yang dikonsumsi"
+    },
+    {
+      q: "Perhatikan pernyataan berikut :\n1. Sinto makan nasi gurih di kantin sekolah\n2. Yona memakai sepatu barunya ke sekolah\n3. Rani minum teh manis dingin karena haus\n4. Gunawan bermain sepeda pada saat acara \"car free day\"\n5. Jessica makan bakso pedas yang lagi promo di mall\n6. Poltak memakai laptop untuk mengerjakan tugas sekolah\n\nDari pernyataan diatas, contoh kegiatan konsumsi yang menghabiskan nilai guna terdapat pada nomor...",
+      options: [
+        "2, 4, dan 6",
+        "1, 2, dan 3",
+        "4, 5, dan 6",
+        "1, 3, dan 5"
+      ],
+      answer: "1, 3, dan 5"
+    },
+    {
+      q: "Perusahaan kecil yang modalnya kecil dan barang-barang yang dijualnya mudah busuk lebih tepat jika menggunakan sistem distribusi ...",
+      options: [
+        "Langsung",
+        "Sistematis",
+        "Semi langsung",
+        "Tidak langsung"
+      ],
+      answer: "Langsung"
+    },
+    {
+      q: "Berikut ini termasuk pedagang eceran yaitu...",
+      options: [
+        "Warung, kios, dan grosir",
+        "Agen, eksportir, dan makelar",
+        "Toko besar, grosir, dan supermarket",
+        "Warung, pedagang kaki lima , dan kios"
+      ],
+      answer: "Warung, pedagang kaki lima , dan kios"
+    },
+    {
+      q: "Perusahaan kecil yang modalnya kecil dan barang-barang yang dijualnya mudah busuk lebih tepat jika menggunakan sistem distribusi ...",
+      options: [
+        "Langsung",
+        "Sistematis",
+        "Semi langsung",
+        "Tidak langsung"
+      ],
+      answer: "Langsung"
+    },
+    {
+      q: "Saat ini, distributor gencar melakukan iklan untuk memperkenalkan produknya. Iklan merupakan hal yang paling penting bagi proses distribusi suatu produk atau barang, karena.... ",
+      options: [
+        "Dapat memengaruhi minat, selera, dan kebutuhan konsumen",
+        "Dapat memengaruhi harga",
+        "Akan mampu menentukan jenis barang apa yang akan di produksi",
+        "Akan mampu mengikat produsen"
+      ],
+      answer: "Dapat memengaruhi minat, selera, dan kebutuhan konsumen"
+    },
+    {
+      q: "Salah satu tugas utama kegiatan distribusi adalah pengangkatan dan pengangkutan. Kegiatan pengangkatan dan pengangkutan merupakan....",
+      options: [
+        "Kegiatan menyimpan sementara dalam gudang barang-barang yang dibeli",
+        "Kegiatan membungkus dan mengepak barang-barang yang sudah dipilah dan dikelompokkan",
+        "Kegiatan memindahkan barang dari lokasi pembelian ke gudang, kemudian dari gudang ke toko, atau ke lokasi konsumen",
+        "Kegiatan memilah-milah dan mengelompokkan barang-barang yang dibeli sesuai bentuk, ukuran, dan mutu"
+      ],
+      answer: "Kegiatan memindahkan barang dari lokasi pembelian ke gudang, kemudian dari gudang ke toko, atau ke lokasi konsumen"
+    },
+    {
+      q: "Perhatikan bagan berikut ini :\n[Produsen] ➔ [Konsumen]\nBagan diatas menggambarkan sistem distribusi...",
+      options: [
+        "Sistem distribusi langsung",
+        "Sistem distribusi semi langsung",
+        "Sistem distribusi campuran",
+        "Sistem distribusi tidak langsung"
+      ],
+      answer: "Sistem distribusi langsung"
+    },
+    {
+      q: "Konsumsi dapat diartikan sebagai kegiatan mengurangi atau menghabiskan nilai guna barang untuk memenuhi kebutuhan. Berikut ini yang merupakan kegiatan konsumsi adalah...",
+      options: [
+        "Pabrik kelapa sawit menghasilkan minyak kelapa sawit yang berkualitas",
+        "Pengusaha tahu dan tempe mengurangi jumlah produksi karena naiknya harga kacang kedelai",
+        "Pabrik Bata menjual hasil produksinya melalui toko Bata",
+        "Perusahaan kecap membeli kacang kedelai untuk digunakan sebagai bahan baku memproduksi kecap"
+      ],
+      answer: "Perusahaan kecap membeli kacang kedelai untuk digunakan sebagai bahan baku memproduksi kecap"
+    },
+    {
+      q: "Keluarga Pak Joni tinggal di kota besar. Jumlah konsumsi keluarga Pak Joni lebih besar dibandingkan dengan keluarga Pak Budi yang tinggal di desa. Perbedaan jumlah konsumsi tersebut karena faktor....",
+      options: [
+        "Jumlah tanggungan keluarga",
+        "Tempat tinggal",
+        "Harga barang dan jasa",
+        "Pendapatan"
+      ],
+      answer: "Tempat tinggal"
+    },
+    {
+      q: "Karena lagi butuh uang, pak Marbun hendak menjual tanahnya dengan meminta bantuan jasa perantara yaitu pak Sinaga. Pak Sinaga kemudian menjual rumah tersebut kepada Ny. Sianturi. Pernyataan yang benar adalah...",
+      options: [
+        "Pemilik tanah tersebut adalah pak Marbun, sedangkan Ny. Sianturi adalah makelarnya.",
+        "Jika pak Sinaga adalah perantara yang menjual tanah tersebut atas namanya sendiri, maka ia akan memperoleh imbalan berupa komisi",
+        "Jika pak Sinaga merupakan seorang makelar, maka tanah tersebut akan dijual atas namanya sendiri",
+        "Karena menjual tanah tersebut atas nama pak Marbun, berarti pak Sinaga merupakan seorang komisioner"
+      ],
+      answer: "Jika pak Sinaga adalah perantara yang menjual tanah tersebut atas namanya sendiri, maka ia akan memperoleh imbalan berupa komisi"
+    },
+    {
+      q: "Yang bukan tugas distributor adalah....",
+      options: [
+        "Menyimpan sementara dalam gudang barang-barang yang dibeli, tetapi tidak dapat langsung dijual",
+        "Mengolah bahan baku menjadi barang setengah jadi",
+        "Menyortir barang-barang atau memilah-milah sesuai dengan jenis, ukuran, dan kualitasnya agar mudah dalam melayani pembeli",
+        "Mengangkut barang-barang ke konsumen atau pedagang yang lebih kecil"
+      ],
+      answer: "Mengolah bahan baku menjadi barang setengah jadi"
+    },
+    {
+      q: "Kegiatan berikut ini yang termasuk distribusi adalah...",
+      options: [
+        "Perusahaan membuat barang untuk dipakai dalam negeri",
+        "Pabrik sepatu mengekspor produknya ke Jepang",
+        "Pabrik tekstil mempekerjakan beberapa karyawan baru",
+        "Usaha kerajinan rumah tangga membuat baju batik"
+      ],
+      answer: "Pabrik sepatu mengekspor produknya ke Jepang"
+    },
+    {
+      q: "Produsen menjual barang kepada grosir. Grosir kemudian menjual barang kepada pedagang eceran. Selanjutnya, pedagang eceran menjual barang tersebut ke konsumen.\nPernyataan diatas menggunakan sistem distribusi...",
+      options: [
+        "Semi langsung",
+        "Campuran",
+        "Langsung",
+        "Tidak langsung"
+      ],
+      answer: "Tidak langsung"
+    },
+    {
+      q: "Pernyataan yang benar tentang imbalan yang diterima badan distribusi adalah...",
+      options: [
+        "Komisioner akan mendapatkan imbalan berupa komisi, sedangkan makelar menerima kurtasi",
+        "Makelar menerima imbalan berupa kurtasi, dan komisioner menerima imbalan berupa upah",
+        "Imbalan yang diterima makelar adalah gaji, sedangkan komisioner akan menerima komisi",
+        "Makelar dan komisioner akan menerima imbalan berupa kurtasi"
+      ],
+      answer: "Komisioner akan mendapatkan imbalan berupa komisi, sedangkan makelar menerima kurtasi"
+    }
+  ];
+
+  let selectedDuration = 15;
+  let playerName = "";
+  let shuffledQuestions = [];
+  let currentIndex = 0;
+  let scoreCount = 0;
+  let timerInterval = null;
+  let timeLeft = 15;
+  let userHistory = [];
+  let answeredCurrent = false;
+
+  function selectDuration(seconds, btn) {
+    selectedDuration = Number(seconds);
+    document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.duration-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        selectDuration(this.getAttribute('data-time'), this);
+      });
+    });
+  });
+
+  function shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function startQuiz() {
+    const nameInput = document.getElementById('player-name').value.trim();
+    const errorMsg = document.getElementById('name-error');
+    if (!nameInput) {
+      errorMsg.style.display = 'block';
+      return;
+    }
+    errorMsg.style.display = 'none';
+    playerName = nameInput;
+
+    // Acak urutan soal dan urutan opsi jawaban setiap memulai kuis baru
+    shuffledQuestions = shuffleArray(rawQuestions).map(item => ({
+      q: item.q,
+      options: shuffleArray(item.options),
+      answer: item.answer
+    }));
+
+    currentIndex = 0;
+    scoreCount = 0;
+    userHistory = [];
+
+    document.getElementById('display-name').textContent = playerName;
+    document.getElementById('q-total').textContent = shuffledQuestions.length;
+
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    clearInterval(timerInterval);
+    answeredCurrent = false;
+
+    const currentQ = shuffledQuestions[currentIndex];
+    document.getElementById('q-current').textContent = currentIndex + 1;
+    document.getElementById('question-text').textContent = currentQ.q;
+
+    const feedbackBar = document.getElementById('feedback-bar');
+    feedbackBar.classList.add('hidden');
+    feedbackBar.className = 'feedback-bar hidden';
+
+    const nextBtn = document.getElementById('next-btn');
+    nextBtn.textContent = (currentIndex === shuffledQuestions.length - 1) ? "Lihat Hasil & Review ➔" : "Soal Berikutnya ➔";
+
+    const optionsList = document.getElementById('options-list');
+    optionsList.innerHTML = '';
+
+    const letters = ['A', 'B', 'C', 'D'];
+    currentQ.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option-btn';
+      btn.dataset.option = opt;
+      btn.innerHTML = `<span class="option-letter">${letters[idx]}</span><span>${opt}</span>`;
+      btn.onclick = () => handleAnswer(opt, btn);
+      optionsList.appendChild(btn);
+    });
+
+    startTimer();
+  }
+
+  function startTimer() {
+    timeLeft = selectedDuration;
+    const timerBox = document.getElementById('timer-box');
+    const timeDisplay = document.getElementById('time-left');
+    timerBox.classList.remove('danger');
+    timeDisplay.textContent = timeLeft;
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timeDisplay.textContent = timeLeft;
+
+      if (timeLeft <= 5) {
+        timerBox.classList.add('danger');
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function handleAnswer(selectedOpt, clickedBtn) {
+    if (answeredCurrent) return;
+    answeredCurrent = true;
+    clearInterval(timerInterval);
+
+    const currentQ = shuffledQuestions[currentIndex];
+    const isCorrect = (selectedOpt === currentQ.answer);
+    const allBtns = document.querySelectorAll('.option-btn');
+
+    allBtns.forEach(btn => {
+      btn.disabled = true;
+      if (btn.dataset.option === currentQ.answer) {
+        btn.classList.add('correct');
+      }
+    });
+
+    const feedbackBar = document.getElementById('feedback-bar');
+    const feedbackText = document.getElementById('feedback-text');
+
+    if (isCorrect) {
+      scoreCount++;
+      feedbackBar.className = 'feedback-bar feedback-correct';
+      feedbackText.textContent = '✔ Jawaban Anda Benar!';
+    } else {
+      clickedBtn.classList.add('wrong');
+      feedbackBar.className = 'feedback-bar feedback-wrong';
+      feedbackText.textContent = '✖ Jawaban Anda Salah!';
+    }
+
+    userHistory.push({
+      question: currentQ.q,
+      userAnswer: selectedOpt,
+      correctAnswer: currentQ.answer,
+      isCorrect: isCorrect,
+      timedOut: false
+    });
+  }
+
+  function handleTimeout() {
+    if (answeredCurrent) return;
+    answeredCurrent = true;
+
+    const currentQ = shuffledQuestions[currentIndex];
+    const allBtns = document.querySelectorAll('.option-btn');
+
+    allBtns.forEach(btn => {
+      btn.disabled = true;
+      if (btn.dataset.option === currentQ.answer) {
+        btn.classList.add('correct');
+      }
+    });
+
+    const feedbackBar = document.getElementById('feedback-bar');
+    const feedbackText = document.getElementById('feedback-text');
+    feedbackBar.className = 'feedback-bar feedback-timeout';
+    feedbackText.textContent = '⏱️ Waktu Habis! Jawaban yang benar ditandai warna hijau.';
+
+    userHistory.push({
+      question: currentQ.q,
+      userAnswer: null,
+      correctAnswer: currentQ.answer,
+      isCorrect: false,
+      timedOut: true
+    });
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < shuffledQuestions.length) {
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }
+
+  function showResults() {
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
+
+    const totalQuestions = shuffledQuestions.length;
+    const finalScore = ((scoreCount / totalQuestions) * 100).toFixed(2).replace(/\.00$/, '');
+
+    document.getElementById('result-player-name').textContent = playerName;
+    document.getElementById('final-score').textContent = finalScore;
+    document.getElementById('total-correct').textContent = scoreCount;
+    document.getElementById('total-wrong').textContent = totalQuestions - scoreCount;
+
+    const reviewList = document.getElementById('review-list');
+    reviewList.innerHTML = '';
+
+    userHistory.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = `review-item ${item.isCorrect ? 'item-correct' : 'item-wrong'}`;
+
+      let userAnsHtml = '';
+      if (item.timedOut) {
+        userAnsHtml = `<div class="review-ans ans-user-timeout">Jawaban Anda: <em>Tidak dijawab (Waktu Habis)</em></div>`;
+      } else if (!item.isCorrect) {
+        userAnsHtml = `<div class="review-ans ans-user-wrong">Jawaban Anda: ${item.userAnswer}</div>`;
+      } else {
+        userAnsHtml = `<div class="review-ans ans-right">Jawaban Anda: ${item.userAnswer} (Benar)</div>`;
+      }
+
+      const rightAnsHtml = !item.isCorrect
+        ? `<div class="review-ans ans-right">Jawaban yang Benar: ${item.correctAnswer}</div>`
+        : '';
+
+      div.innerHTML = `
+        <div class="review-q">${index + 1}. ${item.question}</div>
+        ${userAnsHtml}
+        ${rightAnsHtml}
+      `;
+      reviewList.appendChild(div);
+    });
+  }
+
+  function resetToStart() {
+    document.getElementById('result-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+  }
+</script>
+</body>
+</html>
